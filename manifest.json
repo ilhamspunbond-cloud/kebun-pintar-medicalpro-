@@ -1,7 +1,8 @@
 {
+ "id": "./?app=staff",
  "name": "Kebun Pintar",
  "short_name": "Kebun",
- "start_url": "./",
+ "start_url": "./?app=staff",
  "scope": "./",
  "display": "standalone",
  "background_color": "#0b2a6b",
