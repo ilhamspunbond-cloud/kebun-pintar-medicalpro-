@@ -1,7 +1,7 @@
 {
  "id": "./?app=staff",
  "name": "Kebun Pintar",
- "short_name": "Kebun",
+ "short_name": "smart farm medicalpro",
  "start_url": "./?app=staff",
  "scope": "./",
  "display": "standalone",
