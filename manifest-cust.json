@@ -1,7 +1,7 @@
 {
  "id": "./?app=cust",
- "name": "Kebun Pintar Kedai",
- "short_name": "Kedai",
+ "name": "Medical Pro Shop",
+ "short_name": "Pro Shop",
  "start_url": "./?app=cust",
  "scope": "./",
  "display": "standalone",
