@@ -236,26 +236,30 @@ const WK=[["Hujan dijangka dalam 5 jam: siapkan kerja luar sekarang, tunda sembu
 function adv(){const w=D.wx,l=LI[D.set.lang],z=D.fz,P={cerah:['Cuaca cerah: sesuai kerja luar; mulakan awal pagi, bawa air dan topi.','Cuaca cerah: cocok kerja luar; mulai pagi, bawa air dan topi.','Sunny: good for outdoor work; start early, bring water and a hat.','धूप: बाहर के काम के लिए अच्छा; सुबह जल्दी शुरू करें, पानी और टोपी रखें।','晴天：适合户外工作；请早点开工，带水和帽子。'],mendung:['Mendung: waktu sesuai membaja dan menanam; sedia baju hujan.','Mendung: waktu pas memupuk dan menanam; siapkan jas hujan.','Cloudy: good time to fertilize and plant; keep rain gear ready.','बादल: खाद देने और रोपाई का अच्छा समय; रेनकोट तैयार रखें。','多云：适合施肥和种植；请备好雨具。'],hujan:['Hujan: elak membaja dan menyembur; buat kerja bawah bumbung atau semak parit.','Hujan: hindari memupuk dan menyemprot; kerja di bawah atap atau cek parit.','Rain: avoid fertilizing and spraying; work under cover or check drains.','बारिश: खाद और छिड़काव से बचें; छत के नीचे काम करें या नालियां जांचें。','下雨：避免施肥和喷药；请在遮蔽处工作或检查排水沟。']},d=z.last?z.gap-Math.floor((Date.now()-new Date(z.last))/864e5):null,re=new RegExp({cerah:'cair|foliar|liquid|semburan',mendung:'butir|granul|npk|organik|kompos|compost',hujan:'^$'}[w.c],'i'),fit=D.stock.filter(x=>+x.q>0&&re.test(x.a+' '+x.b)).map(x=>x.a).join(', '),out=D.stock.filter(x=>+x.q<=0).map(x=>x.a).join(', '),F=d==null?['Belum ada rekod pembajaan.','Belum ada catatan pemupukan.','No fertilizing record yet.','अभी तक खाद का रिकॉर्ड नहीं है।','尚无施肥记录。']:d>0?[`Pembajaan terakhir ${z.last}, seterusnya ${d} hari lagi.`,`Pemupukan terakhir ${z.last}, berikutnya ${d} hari lagi.`,`Last fertilized ${z.last}, next in ${d} days.`,`पिछली खाद ${z.last} को दी, अगली ${d} दिन बाद।`,`上次施肥${z.last}，${d}天后再施。`]:[`Pembajaan sudah lewat ${-d} hari!`,`Pemupukan terlambat ${-d} hari!`,`Fertilizing is ${-d} days overdue!`,`खाद देने में ${-d} दिन की देरी!`,`施肥已逾期${-d}天！`],R=w.c==='hujan'?null:fit?[`Baja sesuai cuaca ini: ${fit}.`,`Pupuk cocok cuaca ini: ${fit}.`,`Fertilizer suited to this weather: ${fit}.`,`इस मौसम के लिए उपयुक्त खाद: ${fit}।`,`适合当前天气的肥料：${fit}。`]:['Tiada baja sesuai dalam stok.','Tidak ada pupuk cocok di stok.','No suitable fertilizer in stock.','स्टॉक में उपयुक्त खाद नहीं है।','库存中没有合适的肥料。'],O=out?[`Baja habis: ${out}.`,`Pupuk habis: ${out}.`,`Out of stock: ${out}.`,`खत्म हुई खाद: ${out}।`,`已用完的肥料：${out}।`]:null,pd=D.works.filter(x=>x.st!=='done').map(x=>x.a).slice(0,2).join(', '),h=[P[w.c][l],w.soil&&WK[(w.mx||0)>=60?0:w.soil==='sb'?1:w.soil==='sl'?2:3][l],F[l],R&&R[l],O&&O[l],pd&&t('prog')+': '+pd].filter(Boolean);return{h,s:h.join(' ')}}
 function recapText(){const mo=today().slice(0,7),w=D.works,done=w.filter(x=>x.st==='done'&&x.d.startsWith(mo)).length,pr=w.filter(x=>x.st!=='done').length,k=sum(D.exp.filter(x=>x.ty==='kebun'&&x.d.startsWith(mo))),o=sum(D.exp.filter(x=>x.ty==='office'&&x.d.startsWith(mo))),low=D.stock.filter(x=>+x.q<=5).length,n=me?me.n:'';
 return [`${hw()}, ${n}. Bulan ini ${done} kerja telah siap dan ${pr} masih berjalan. Perbelanjaan kebun ${k.toFixed(0)} ringgit, perbelanjaan pejabat ${o.toFixed(0)} ringgit. ${low} jenis baja hampir habis.`,`${hw()}, ${n}. Bulan ini ${done} pekerjaan sudah selesai dan ${pr} masih berjalan. Pengeluaran kebun ${k.toFixed(0)} ringgit, pengeluaran kantor ${o.toFixed(0)} ringgit. ${low} jenis pupuk hampir habis.`,`${hw()}, ${n}. This month ${done} jobs are done and ${pr} are in progress. Farm spending is ${k.toFixed(0)} ringgit, office spending ${o.toFixed(0)} ringgit. ${low} fertilizer types are running low.`,`${hw()}, ${n}. इस महीने ${done} काम पूरे हुए और ${pr} जारी हैं। खेत का खर्च ${k.toFixed(0)} रिंगिट, ऑफिस का खर्च ${k.toFixed(0) ? o.toFixed(0) : 0} रिंगिट। ${low} प्रकार की खाद कम है।`,`${hw()}，${n}。本月已完成${done}项工作，${pr}项进行中。农场支出${k.toFixed(0)}令吉，办公室支出${o.toFixed(0)}令吉。${low}种肥料库存不足。`][LI[D.set.lang]]+' '+adv().s}
+const FB={ok:false,err:''};
+const fbBadge=()=>co()?'':`<button class="g" aria-label="Status Firebase" onclick="fbInfo()">${FB.err?'🔴':FB.ok?'🟢':'🟡'}</button>`;
+function fbInfo(){const H={'permission-denied':'Aturan Firestore menolak. Firebase Console → Firestore Database → Rules → tempel aturan (request.auth != null) → Publish.','operation-not-allowed':'Aktifkan Authentication → Sign-in method → Anonymous.','admin-restricted':'Aktifkan Authentication → Sign-in method → Anonymous.','unauthorized-domain':'Tambah alamat GitHub Pages di Authentication → Settings → Authorized domains.','api-key':'firebaseConfig salah (apiKey).','failed-precondition':'Firestore Database belum dibuat. Build → Firestore Database → Create database.','not-found':'Firestore Database belum dibuat. Build → Firestore Database → Create database.','unavailable':'Tiada internet atau Firestore tidak dapat dicapai.'};const k=Object.keys(H).find(x=>FB.err.includes(x));alert((FB.err?'🔴 '+FB.err:FB.ok?'🟢 Tersambung ke Firebase. Data sinkron real-time.':'🟡 Sedang menyambung…')+(k?'\n\n'+H[k]:''))}
+const cbadge=()=>{if(!me)return '';if(!localStorage.getItem('lc'))localStorage.setItem('lc',Date.now());if(tab==='chat')return '';const lc=+localStorage.getItem('lc'),n=D.chat.filter(m=>m._t>lc&&m.by!==me.n).length;return n?` <b style="background:#d32f2f;color:#fff;border-radius:10px;padding:0 6px">${n}</b>`:''};
 function langSel(){return `<select aria-label="Language" onchange="D.set.lang=this.value;localStorage.setItem('lg',this.value);style();render();if(me)speak(recapText())">${['ms|BM','id|ID','en|EN','hi|हिंदी','zh|中文'].map(x=>{const[a,b]=x.split('|');return `<option value="${a}" ${D.set.lang===a?'selected':''}>${b}</option>`}).join('')}</select>`}
-function head(){const s=D.set;return `<header>${lg()?`<img src="${lg()}" alt="">`:''}<div><b>${esc(mode==='shop'?(s.shop||s.name):s.name)}</b><small>${esc(s.partner)}</small></div><span class="sp"></span>${ip?`<button onclick="ip.prompt();ip=null;render()">📲</button>`:''}${langSel()}${me||(cust&&!cust.staff)?`<button class="g" onclick="me=null;cust='';unlocked=false;try{localStorage.removeItem('cid');localStorage.removeItem('sess');localStorage.removeItem('tab')}catch(e){}render()">${t('out')}</button>`:''}</header>`}
+function head(){const s=D.set;return `<header>${lg()?`<img src="${lg()}" alt="">`:''}<div><b>${esc(mode==='shop'?(s.shop||s.name):s.name)}</b><small>${esc(s.partner)}</small></div><span class="sp"></span>${ip?`<button onclick="ip.prompt();ip=null;render()">📲</button>`:''}${langSel()}${fbBadge()}${me||(cust&&!cust.staff)?`<button class="g" onclick="me=null;cust='';unlocked=false;try{localStorage.removeItem('cid');localStorage.removeItem('sess');localStorage.removeItem('tab')}catch(e){}render()">${t('out')}</button>`:''}</header>`}
 function photoIn(){return `<label>${t('photo')}<input type="file" accept="image/*" onchange="pick(this)"></label><img id="pv" alt="" ${ph?`src="${ph}"`:''} style="display:${ph?'block':'none'};max-width:120px;border-radius:8px">`}
 function pick(el,cb,png){const f=el.files[0];if(!f)return;const r=new FileReader;r.onerror=()=>toast('Gagal membaca file');r.onload=()=>{const i=new Image;i.onerror=()=>toast('Format tidak didukung, pakai JPG/PNG');i.onload=()=>{const m=Math.min(1,480/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*m;c.height=i.height*m;const x=c.getContext('2d');if(!png){x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height)}x.drawImage(i,0,0,c.width,c.height);const d=c.toDataURL(png?'image/png':'image/jpeg',.7);if(cb)cb(d);else{ph=d;const p=$('#pv');if(p){p.src=d;p.style.display='block'}}toast('✔ Foto dimuat')};i.src=r.result};r.readAsDataURL(f)}
 const v=id=>($('#'+id)||{}).value||'';
 function render(){style();const a=$('#app');if(mode==='shop'){a.innerHTML=head()+modeSw()+(!cust&&(localStorage.getItem('cid')||localStorage.getItem('sess'))&&!window.__ready0?'<div class="card login">⏳</div>':shop());return}
 if(!me&&localStorage.getItem('sess')&&!window.__ready0){a.innerHTML=head()+'<div class="card login">⏳</div>';return}
-if(!me){a.innerHTML=head()+modeSw()+`<div class="card login">${D.set.logo?`<img src="${D.set.logo}" alt="">`:'<div style="font-size:54px">🌱</div>'}<h3>${esc(D.set.name)}</h3><div class="f"><input id="lp" type="password" placeholder="${t('pass')}" autocomplete="current-password"><button onclick="login()">${t('enter')}</button></div></div>`;return}
+if(!me){a.innerHTML=head()+modeSw()+`<div class="card login">${D.set.logo?`<img src="${D.set.logo}" alt="">`:'<div style="font-size:54px">🌱</div>'}<h3>${esc(D.set.name)}</h3><div class="f"><input id="lp" type="password" placeholder="${t('pass')}" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')login()"><button onclick="login()">${t('enter')}</button></div></div>`;return}
 const R=me.r,all={home:1,chat:1,work:1,stock:1,harv:1,spend:R==='admin'||R==='office',prod:R!=='worker',recap:R==='admin'||R==='office',po:R==='admin'||R==='sales',ref:R==='admin'||R==='sales',ai:R==='admin',shopset:R==='admin',set:me.id==='master'};
 const tabs=Object.keys(all).filter(k=>all[k]);if(!all[tab])tab='home';
-a.innerHTML=head()+modeSw()+`<nav>${tabs.map(k=>`<button class="${k===tab?'on':''}" onclick="tab='${k}';ph='';localStorage.setItem('tab','${k}');render()"><span class="ic">${k==='set'?(unlocked?'⚙️🔓':'⚙️🔒'):IC[k]}</span>${t(k)}${k==='po'&&nPO()?' ('+nPO()+')':''}</button>`).join('')}</nav>`+VIEWS[tab]()}
+a.innerHTML=head()+modeSw()+`<nav>${tabs.map(k=>`<button class="${k===tab?'on':''}" onclick="tab='${k}';ph='';localStorage.setItem('tab','${k}');render()"><span class="ic">${k==='set'?(unlocked?'⚙️🔓':'⚙️🔒'):IC[k]}</span>${t(k)}${k==='po'&&nPO()?' ('+nPO()+')':''}${k==='chat'?cbadge():''}</button>`).join('')}</nav>`+VIEWS[tab]()}
 function modeSw(){if(co())return '';return `<nav><button class="${mode==='ctl'?'on':''}" onclick="mode='ctl';render()"><span class="ic">🌿</span>${t('ctl')}</button><button class="${mode==='shop'?'on':''}" onclick="mode='shop';render()"><span class="ic">🛒</span>${t('shop')}</button></nav>`}
-async function login(){try{speechSynthesis.speak(new SpeechSynthesisUtterance(''))}catch(e){}const h=await sha(v('lp')),mh=await sha(v('lp').replace(/\s/g,'').toLowerCase());if(mh===MH){me={n:D.set.boss||'ABDUL ROJAK',r:'admin',id:'master'};unlocked=true;tab='set';try{localStorage.setItem('sess','{"id":"master"}');localStorage.setItem('tab','set')}catch(e){}render();return}if(!window.__ready)return toast('Memuat… (cek Firebase: Anonymous Auth & Rules)');const u=D.users.find(x=>x.h===h);if(!u)return toast(t('wrong'));me=u;unlocked=false;tab='home';try{localStorage.setItem('sess',JSON.stringify({id:u.id}));localStorage.setItem('tab','home')}catch(e){}render();speak(recapText())}
+async function login(){try{speechSynthesis.speak(new SpeechSynthesisUtterance(''))}catch(e){}const h=await sha(v('lp').trim()),mh=await sha(v('lp').replace(/\s/g,'').toLowerCase());if(mh===MH){me={n:D.set.boss||'ABDUL ROJAK',r:'admin',id:'master'};unlocked=true;tab='set';try{localStorage.setItem('sess','{"id":"master"}');localStorage.setItem('tab','set')}catch(e){}render();return}const u=D.users.find(x=>x.h===h);if(!u)return toast(window.__ready?t('wrong')+' · '+(FB.err||'cek kata sandi'):'Memuat… 🟡 tekan tombol status di atas untuk cek Firebase');me=u;unlocked=false;tab='home';try{localStorage.setItem('sess',JSON.stringify({id:u.id}));localStorage.setItem('tab','home')}catch(e){}render();speak(recapText())}
 const zs={};function zoom(i){$('#ov').style.display='flex';$('#ov').innerHTML=`<div class="inv"><img src="${zs[i]}" style="width:100%" alt=""><button class="np" onclick="closeOv()">OK</button></div>`}
 function closeOv(){$('#ov').style.display='none'}
 function thumb(x){return x.ph?`<img class="t" src="${x.ph}" alt="" onclick="zoom('${x.id}')">`:''}
 function list(a,fn){const k=Object.keys(FS).find(z=>D[z]===a);return a.length?(a.every(x=>/^\d{4}-\d\d-\d\d/.test(x.d||''))?[...a].sort((x,y)=>(y.d||'').localeCompare(x.d||'')||(y._t||0)-(x._t||0)):[...a].reverse()).map(x=>{if(x.ph)zs[x.id]=x.ph;const b=k&&me&&(me.r==='admin'||!x.by||x.by===me.n)?`<span style="display:flex;flex-direction:column;gap:4px;flex:none"><button class="g" onclick="ed('${k}','${x.id}')">✏️</button><button class="g" onclick="dl('${k}','${x.id}')">🗑️</button></span>`:'';return `<div class="row">${thumb(x)}<div>${fn(x)}</div>${b}</div>`}).join(''):`<small>${t('empty')}</small>`}
 const uid=()=>Math.random().toString(36).slice(2,9);
 const VIEWS={
-chat(){
+chat(){try{localStorage.setItem('lc',Date.now())}catch(_){}
   const us=Object.fromEntries(D.users.map(u=>[u.n,u])), lb='style="padding:8px 10px;border:1px solid var(--ln);border-radius:10px;cursor:pointer"';
   return `<div class="card" style="max-height:55vh;overflow:auto" id="cl">${D.chat.map(m=>{
     const u=us[m.by]||{n:m.by};
@@ -365,7 +369,7 @@ function ed(k,id){const x=D[k].find(z=>z.id===id);if(!x)return;$('#ov').style.di
 function edS(k,id){const x=D[k].find(z=>z.id===id);FS[k].forEach(([f,,ty],i)=>{const q=$('#e'+i).value;x[f]=ty==='number'?+q:q});save();closeOv();render()}
 function dl(k,id){if(!confirm('🗑️ ?'))return;D[k]=D[k].filter(z=>z.id!==id);save();render()}
 function sumTxt(){const mo=today().slice(0,7),w=D.works,done=w.filter(x=>x.st==='done'&&x.d.startsWith(mo)).length,pr=w.filter(x=>x.st!=='done').length,k=sum(D.exp.filter(x=>x.ty==='kebun'&&x.d.startsWith(mo))),o=sum(D.exp.filter(x=>x.ty==='office'&&x.d.startsWith(mo))),low=D.stock.filter(x=>+x.q<=5).length;return `✔ ${done} ${t('done')} · ⏳ ${pr} ${t('prog')} · 💸 ${t('kebun')} ${rm(k)} · ${t('office')} ${rm(o)} · ⚠️ ${low} ${t('stock')}`}
-async function addU(){const p=v('p'),n=v('n');if(!n||!p)return;const h=await sha(p);if(D.users.some(x=>x.h===h||slug(x.n)===slug(n)))return toast(t('wrong'));D.users.push({id:uid(),n,h,r:v('r'),wa:v('uw'),ph});ph='';save();render();toast('✔ Pengguna ditambah')}
+async function addU(){const p=v('p').trim(),n=v('n').trim();if(!n||!p)return toast('Isi nama dan kata sandi');const h=await sha(p);if(D.users.some(x=>x.h===h||slug(x.n)===slug(n)))return toast('Nama atau kata sandi sudah dipakai');D.users.push({id:uid(),n,h,r:v('r'),wa:v('uw'),ph});ph='';save();render();toast(FB.err?'⚠ Pengguna ditambah tapi belum tersimpan: '+FB.err:'✔ Pengguna ditambah')}
 function pv(){Object.assign(D.set,{color:v('c'),bg:v('d'),panel:v('pn')});style()}
 function geo(){navigator.geolocation.getCurrentPosition(p=>{D.set.lat=+p.coords.latitude.toFixed(5);D.set.lon=+p.coords.longitude.toFixed(5);save();render();toast('📍 OK');window.wxRefresh&&wxRefresh()},()=>toast('Lokasi ditolak'))}
 const AIT={
@@ -494,11 +498,12 @@ const app=initializeApp({
 
 const db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
 const AR=['users','stock','works','exp','harv','prods','pos','inv','chat','cust','mem','miss','cl','promo'],OB=['set','fz','shp'],last={};let pend=0;
-const rerender=()=>{const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))pend=1;else render()};
-document.addEventListener('focusout',()=>{if(pend){pend=0;setTimeout(render,80)}});
-const wr=(c,id,o)=>setDoc(doc(db,c,id),o).catch(()=>toast('Gagal simpan'));
+const rerender=()=>{const st={};document.querySelectorAll('#app input:not([type=file]):not([type=checkbox]),#app textarea,#app select').forEach(e=>{if(e.id)st[e.id]=e.value});const cl=document.getElementById('cl'),bot=!cl||cl.scrollHeight-cl.scrollTop-cl.clientHeight<80,a=document.activeElement,fid=a&&a.id,ss=a&&a.selectionStart,se=a&&a.selectionEnd;render();for(const id in st){const e=document.getElementById(id);if(e&&e.value!==st[id])e.value=st[id]}const c2=document.getElementById('cl');if(c2&&bot)c2.scrollTop=1e9;if(fid){const e=document.getElementById(fid);if(e&&e!==document.activeElement){e.focus();try{e.setSelectionRange(ss,se)}catch(_){}}}};
+window.rr=rerender;
+const fbs=(w,e)=>{const c=(e&&(e.code||e.message))||String(e),m=w+': '+c;if(FB.err!==m){FB.err=m;toast('🔴 '+m);rerender()}};
+const wr=(c,id,o)=>setDoc(doc(db,c,id),o).then(()=>{if(FB.err.startsWith('tulis')){FB.err='';rerender()}}).catch(e=>fbs('tulis '+c,e));
 
-save=()=>{for(const k of AR){const ids=new Set();D[k].forEach(x=>{x.id=x.id||uid();x._t=x._t||Date.now();ids.add(x.id);const s=JSON.stringify(x),key=k+'/'+x.id;if(last[key]!==s){last[key]=s;wr(k,x.id,x)}});for(const key in last)if(key.startsWith(k+'/')&&!ids.has(key.slice(k.length+1))){delete last[key];deleteDoc(doc(db,k,key.slice(k.length+1)))}}
+save=()=>{for(const k of AR){const ids=new Set();D[k].forEach(x=>{x.id=x.id||uid();x._t=x._t||Date.now();ids.add(x.id);const s=JSON.stringify(x),key=k+'/'+x.id;if(last[key]!==s){last[key]=s;wr(k,x.id,x)}});for(const key in last)if(key.startsWith(k+'/')&&!ids.has(key.slice(k.length+1))){delete last[key];deleteDoc(doc(db,k,key.slice(k.length+1))).catch(e=>fbs('padam '+k,e))}}
 for(const k of OB){const s=JSON.stringify(D[k]),key='cfg/'+k;if(last[key]!==s){last[key]=s;wr('cfg',k,D[k])}}};
 
 async function wx(){const s=D.set;try{const j=await(await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}&current=temperature_2m,precipitation,weather_code&hourly=temperature_2m,precipitation,precipitation_probability,weather_code&past_days=1&forecast_days=2&timezone=Asia%2FKuala_Lumpur`)).json(),c=j.current,H=j.hourly,i=H.time.indexOf(c.time.slice(0,13)+':00');if(i<0)return;
@@ -508,13 +513,15 @@ const mm=H.precipitation.slice(Math.max(0,i-15),i+1).reduce((a,b)=>a+(b||0),0),w
 D.wx={c:wet?'hujan':c.weather_code<=1?'cerah':'mendung',t:Math.round(c.temperature_2m),d:today(),hr,mm:+mm.toFixed(1),soil:mm>=5?'sb':mm>=1?'sl':'sk',mx:Math.max(0,...hr.map(x=>x.p)),ic:ic(c.weather_code,wet?100:0,+c.time.slice(11,13))};rerender()}catch(e){}}
 window.wxRefresh=wx;
 
-try{await signInAnonymously(getAuth(app))}catch(e){toast('Aktifkan Anonymous Auth')}
+try{await signInAnonymously(getAuth(app))}catch(e){fbs('auth',e)}
 
 for(const k of AR)onSnapshot(collection(db,k),sn=>{
   const a=[];sn.forEach(d=>{const x=d.data();last[k+'/'+x.id]=JSON.stringify(x);a.push(x)});
   const ids=new Set(a.map(x=>x.id));
   for(const key in last)if(key.startsWith(k+'/')&&!ids.has(key.slice(k.length+1)))delete last[key];
-  D[k]=a.sort((p,q)=>p._t-q._t);
+  const oldIds=new Set((D[k]||[]).map(x=>x.id));D[k]=a.sort((p,q)=>p._t-q._t);
+  if(k==='chat'){if(window.__chatSeen&&me)a.filter(x=>!oldIds.has(x.id)&&x.by!==me.n).forEach(x=>{if(tab!=='chat')toast('💬 '+x.by+': '+String(x.txt||'📎').slice(0,40));try{navigator.vibrate&&navigator.vibrate(120)}catch(_){}});window.__chatSeen=1}
+  if(!sn.metadata.fromCache){FB.ok=true;if(FB.err.startsWith('baca'))FB.err=''}
   
   if(k==='cust'&&co()&&!cust&&!me&&!localStorage.getItem('sess')){const c=D.cust.find(x=>x.id===localStorage.getItem('cid'));if(c)cust=c}
   
@@ -554,7 +561,7 @@ for(const k of AR)onSnapshot(collection(db,k),sn=>{
   }
   
   rerender()
-});
+},e=>fbs('baca '+k,e));
 
 onSnapshot(collection(db,'cfg'),sn=>{
   sn.forEach(d=>{D[d.id]=Object.assign(D[d.id]||{},d.data());last['cfg/'+d.id]=JSON.stringify(D[d.id])});
@@ -563,7 +570,7 @@ onSnapshot(collection(db,'cfg'),sn=>{
   if(D.set.name==='Kebun Saya')D.set.name='Smart Farm Medical Pro';
   D.set.shop=D.set.shop||'Medical Pro Shop';
   style();rerender();wx()
-});
+},e=>fbs('baca cfg',e));
 
 setInterval(wx,9e5);wx();
 </script>
