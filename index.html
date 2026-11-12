@@ -241,7 +241,18 @@ render();
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {getAuth,signInAnonymously} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-const app=initializeApp({apiKey:"AIzaSyBj1TuzNI2Fidn8avOtKhMXZp9FnMcODIA",authDomain:"kebun-pintar-medicalpro.firebaseapp.com",projectId:"kebun-pintar-medicalpro",storageBucket:"kebun-pintar-medicalpro.firebasestorage.app",messagingSenderId:"891372297728",appId:"1:891372297728:web:1d46d6e4ddeacb780bc2e5",measurementId:"G-ZTKN6ND9FF"});
+
+// Konfigurasi Firebase Anda yang sudah benar
+const app=initializeApp({
+  apiKey: "AIzaSyCH94A0WQbjPYKzbKxO7cfXsSvOMmdd47g",
+  authDomain: "kebun-pintar-medicalpro-4fed0.firebaseapp.com",
+  projectId: "kebun-pintar-medicalpro-4fed0",
+  storageBucket: "kebun-pintar-medicalpro-4fed0.firebasestorage.app",
+  messagingSenderId: "732368979496",
+  appId: "1:732368979496:web:9cb3934728e03bf5c9571d",
+  measurementId: "G-JEEWZEWZT9"
+});
+
 const db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
 const AR=['users','stock','works','exp','harv','prods','pos','inv','chat','cust','mem','miss','cl','promo'],OB=['set','fz','shp'],last={};let pend=0;
 const rerender=()=>{const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))pend=1;else render()};
