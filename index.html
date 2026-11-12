@@ -237,12 +237,12 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(
 if(co()){document.querySelector('link[rel=manifest]').href='manifest-cust.json';document.querySelector('link[rel=apple-touch-icon]').href='icon-c-192.png';document.querySelector('meta[name=theme-color]').content='#0f6b3a'}
 setTimeout(()=>{if(!window.__ready0){window.__ready0=1;render()}},6000);
 render();
-</script><script type="module">
+</script>
+ <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,setDoc,deleteDoc,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import {getAuth,signInAnonymously} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
-// Konfigurasi Firebase Anda yang sudah benar
 const app=initializeApp({
   apiKey: "AIzaSyCH94A0WQbjPYKzbKxO7cfXsSvOMmdd47g",
   authDomain: "kebun-pintar-medicalpro-4fed0.firebaseapp.com",
@@ -258,21 +258,76 @@ const AR=['users','stock','works','exp','harv','prods','pos','inv','chat','cust'
 const rerender=()=>{const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))pend=1;else render()};
 document.addEventListener('focusout',()=>{if(pend){pend=0;setTimeout(render,80)}});
 const wr=(c,id,o)=>setDoc(doc(db,c,id),o).catch(()=>toast('Gagal simpan'));
+
 save=()=>{for(const k of AR){const ids=new Set();D[k].forEach(x=>{x.id=x.id||uid();x._t=x._t||Date.now();ids.add(x.id);const s=JSON.stringify(x),key=k+'/'+x.id;if(last[key]!==s){last[key]=s;wr(k,x.id,x)}});for(const key in last)if(key.startsWith(k+'/')&&!ids.has(key.slice(k.length+1))){delete last[key];deleteDoc(doc(db,k,key.slice(k.length+1)))}}
 for(const k of OB){const s=JSON.stringify(D[k]),key='cfg/'+k;if(last[key]!==s){last[key]=s;wr('cfg',k,D[k])}}};
+
 async function wx(){const s=D.set;try{const j=await(await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}&current=temperature_2m,precipitation,weather_code&hourly=temperature_2m,precipitation,precipitation_probability,weather_code&past_days=1&forecast_days=2&timezone=Asia%2FKuala_Lumpur`)).json(),c=j.current,H=j.hourly,i=H.time.indexOf(c.time.slice(0,13)+':00');if(i<0)return;
 const ic=(w,p,h)=>p>=60||w>=51?(w>=95?'⛈️':'🌧️'):w<=1?(h>=19||h<6?'🌙':'☀️'):w==2?'⛅':'☁️';
 const hr=[];for(let k=1;k<=5;k++){const x=i+k;if(x<H.time.length){const h=+H.time[x].slice(11,13);hr.push({h,i:ic(H.weather_code[x],H.precipitation_probability[x],h),t:Math.round(H.temperature_2m[x]),p:H.precipitation_probability[x]})}}
 const mm=H.precipitation.slice(Math.max(0,i-15),i+1).reduce((a,b)=>a+(b||0),0),wet=c.precipitation>.1||c.weather_code>=51;
 D.wx={c:wet?'hujan':c.weather_code<=1?'cerah':'mendung',t:Math.round(c.temperature_2m),d:today(),hr,mm:+mm.toFixed(1),soil:mm>=5?'sb':mm>=1?'sl':'sk',mx:Math.max(0,...hr.map(x=>x.p)),ic:ic(c.weather_code,wet?100:0,+c.time.slice(11,13))};rerender()}catch(e){}}
 window.wxRefresh=wx;
+
 try{await signInAnonymously(getAuth(app))}catch(e){toast('Aktifkan Anonymous Auth')}
-for(const k of AR)onSnapshot(collection(db,k),sn=>{const a=[];sn.forEach(d=>{const x=d.data();last[k+'/'+x.id]=JSON.stringify(x);a.push(x)});const ids=new Set(a.map(x=>x.id));for(const key in last)if(key.startsWith(k+'/')&&!ids.has(key.slice(k.length+1)))delete last[key];D[k]=a.sort((p,q)=>p._t-q._t);if(k==='cust'&&co()&&!cust&&!me&&!localStorage.getItem('sess')){const c=D.cust.find(x=>x.id===localStorage.getItem('cid'));if(c)cust=c}
-if(k==='users'&&!me){try{const q=co()?null:JSON.parse(localStorage.getItem('sess')||'null');if(q){const u=q.id==='master'?{n:D.set.boss||'ABDUL ROJAK',r:'admin',id:'master'}:D.users.find(x=>x.id===q.id);if(u){me=u;unlocked=q.id==='master';tab=localStorage.getItem('tab')||'home'}}}catch(e){}if(co()&&!cust&&localStorage.getItem('sess')){try{const q=JSON.parse(localStorage.getItem('sess'));const u=q.id==='master'?{n:D.set.boss||'ABDUL ROJAK'}:D.users.find(x=>x.id===q.id);if(u)cust={id:'staff',n:u.n,wa:'',addr:'',code:'',ref:'',refName:'',staff:1}}catch(e){}window.__ready0=1}if(!co()&&(me||!sn.metadata.fromCache))window.__ready0=1}
-if(k==='cust'&&co())window.__ready0=1;
-if(k==='users'&&!sn.metadata.fromCache){if(!window.__ready){window.__ready=1;if(!a.length)sha('1234').then(h=>{D.users.push({n:'admin',h,r:'admin'});save()})}}
-if(me&&k==='users')me=D.users.find(u=>u.id===me.id)||me;rerender()});
-onSnapshot(collection(db,'cfg'),sn=>{sn.forEach(d=>{D[d.id]=Object.assign(D[d.id]||{},d.data());last['cfg/'+d.id]=JSON.stringify(D[d.id])});D.set.lang=localStorage.getItem('lg')||'ms';if(D.set.color==='#1f6b3a')D.set.color='#ffc107';if(D.set.name==='Kebun Saya')D.set.name='Smart Farm Medical Pro';D.set.shop=D.set.shop||'Medical Pro Shop';style();rerender();wx()});
+
+for(const k of AR)onSnapshot(collection(db,k),sn=>{
+  const a=[];sn.forEach(d=>{const x=d.data();last[k+'/'+x.id]=JSON.stringify(x);a.push(x)});
+  const ids=new Set(a.map(x=>x.id));
+  for(const key in last)if(key.startsWith(k+'/')&&!ids.has(key.slice(k.length+1)))delete last[key];
+  D[k]=a.sort((p,q)=>p._t-q._t);
+  
+  if(k==='cust'&&co()&&!cust&&!me&&!localStorage.getItem('sess')){const c=D.cust.find(x=>x.id===localStorage.getItem('cid'));if(c)cust=c}
+  
+  if(k==='users'&&!me){
+    try{
+      const q=co()?null:JSON.parse(localStorage.getItem('sess')||'null');
+      if(q){
+        // Jika login pakai master key, gunakan nama bos dari set. Jika pakai akun staf, gunakan nama asli staf tersebut
+        const u=q.id==='master'?{n:D.set.boss||'ABDUL ROJAK',r:'admin',id:'master'}:D.users.find(x=>x.id===q.id);
+        if(u){me=u;unlocked=q.id==='master';tab=localStorage.getItem('tab')||'home'}
+      }
+    }catch(e){}
+    if(co()&&!cust&&localStorage.getItem('sess')){
+      try{
+        const q=JSON.parse(localStorage.getItem('sess'));
+        const u=q.id==='master'?{n:D.set.boss||'ABDUL ROJAK'}:D.users.find(x=>x.id===q.id);
+        if(u)cust={id:'staff',n:u.n,wa:'',addr:'',code:'',ref:'',refName:'',staff:1}
+      }catch(e){}
+      window.__ready0=1
+    }
+    if(!co()&&(me||!sn.metadata.fromCache))window.__ready0=1
+  }
+  
+  if(k==='cust'&&co())window.__ready0=1;
+  
+  if(k==='users'&&!sn.metadata.fromCache){
+    if(!window.__ready){
+      window.__ready=1;
+      if(!a.length)sha('1234').then(h=>{D.users.push({n:'admin',h,r:'admin'});save()})
+    }
+  }
+  
+  // PERBAIKAN: Pastikan 'me' diperbarui berdasarkan data terbaru pengguna di database tanpa menimpa nama asli mereka
+  if(me && k==='users') {
+    if(me.id !== 'master') {
+      const foundUser = D.users.find(u=>u.id===me.id);
+      if(foundUser) me = foundUser;
+    }
+  }
+  
+  rerender()
+});
+
+onSnapshot(collection(db,'cfg'),sn=>{
+  sn.forEach(d=>{D[d.id]=Object.assign(D[d.id]||{},d.data());last['cfg/'+d.id]=JSON.stringify(D[d.id])});
+  D.set.lang=localStorage.getItem('lg')||'ms';
+  if(D.set.color==='#1f6b3a')D.set.color='#ffc107';
+  if(D.set.name==='Kebun Saya')D.set.name='Smart Farm Medical Pro';
+  D.set.shop=D.set.shop||'Medical Pro Shop';
+  style();rerender();wx()
+});
+
 setInterval(wx,9e5);wx();
 </script>
 </body></html>
