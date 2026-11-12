@@ -86,7 +86,14 @@ function closeOv(){$('#ov').style.display='none'}
 function list(a,fn){const k=Object.keys(FS).find(z=>D[z]===a);return a.length?(a.every(x=>/^\d{4}-\d\d-\d\d/.test(x.d||''))?[...a].sort((x,y)=>(y.d||'').localeCompare(x.d||'')||(y._t||0)-(x._t||0)):[...a].reverse()).map(x=>{if(x.ph)zs[x.id]=x.ph;const b=k&&me&&(me.r==='admin'||!x.by||x.by===me.n)?`<span style="display:flex;flex-direction:column;gap:4px;flex:none"><button class="g" onclick="ed('${k}','${x.id}')">✏️</button><button class="g" onclick="dl('${k}','${x.id}')">🗑️</button></span>`:'';return `<div class="row">${thumb(x)}<div>${fn(x)}</div>${b}</div>`}).join(''):`<small>${t('empty')}</small>`}
 const uid=()=>Math.random().toString(36).slice(2,9);
 const VIEWS={
-chat(){const us=Object.fromEntries(D.users.map(u=>[u.n,u])),lb='style="padding:8px 10px;border:1px solid var(--ln);border-radius:10px;cursor:pointer"';return `<div class="card" style="max-height:55vh;overflow:auto" id="cl">${D.chat.map(m=>{const u=us[m.by]||{n:m.by};return `<div class="row" style="align-items:flex-start">${u.ph?`<img class="t" src="${u.ph}" alt="" style="border-radius:50%">`:'<span style="font-size:30px">👤</span>'}<div><b>${esc(u.r==='admin'&&D.set.boss?D.set.boss:u.n)}</b> <small style="display:inline">${m.ts}</small><br><span id="m_${m.id}">${esc(m.txt)}</span>${m.txt?`<button class="g" onclick="trn('m_${m.id}')">🌐</button>`:''}${(me.r==='admin'||m.by===me.n)?`<span style="float:right;display:inline-flex;gap:4px"><button class="g" onclick="ed('chat','${m.id}')">✏️</button><button class="g" onclick="dl('chat','${m.id}')">🗑️</button></span>`:''}${m.img?`<img src="${m.img}" alt="" style="max-width:100%;border-radius:8px">`:''}${m.vid?`<video controls src="${m.vid}" style="max-width:100%"></video>`:''}${m.aud?`<audio controls src="${m.aud}"></audio>`:''}</div></div>`}).join('')||`<small>${t('empty')}</small>`}</div><div class="card f"><input id="cm" placeholder="${t('chat')}"><div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="sendC()">➤</button><label ${lb}>🖼️<input type="file" accept="image/*" hidden onchange="pick(this,d=>sendC({img:d}))"></label><label ${lb}>🎥<input type="file" accept="video/*" hidden onchange="fileC(this,'vid')"></label><button class="g" id="rec" onclick="recC()">${mr?'⏹ Stop':'🎤'}</button></div></div>`},
+chat(){
+  const us=Object.fromEntries(D.users.map(u=>[u.n,u]));
+  return `<div class="card" style="max-height:55vh;overflow:auto" id="cl">${D.chat.map(m=>{
+    // Ambil nama pengirim asli berdasarkan data pengguna, atau gunakan m.by jika tidak ada di list
+    const u=us[m.by]||{n:m.by};
+    return `<div class="row" style="align-items:flex-start">${u.ph?`<img class="t" src="${u.ph}" alt="" style="border-radius:50%">`:'<span style="font-size:30px">👤</span>'}<div><b>${esc(u.n)}</b> <small style="display:inline">${m.ts}</small><br><span id="m_${m.id}">${esc(m.txt)}</span>${m.txt?`<button class="g" onclick="trn('m_${m.id}')">🌐</button>`:''}${(me.r==='admin'||m.by===me.n)?`<span style="float:right;display:inline-flex;gap:4px"><button class="g" onclick="ed('chat','${m.id}')">✏️</button><button class="g" onclick="dl('chat','${m.id}')">🗑️</button></span>`:''}${m.img?`<img src="${m.img}" alt="" style="max-width:100%;border-radius:8px">`:''}${m.vid?`<video controls src="${m.vid}" style="max-width:100%"></video>`:''}${m.aud?`<audio controls src="${m.aud}"></audio>`:''}</div></div>`
+  }).join('')||`<small>${t('empty')}</small>`}</div><div class="card f"><input id="cm" placeholder="${t('chat')}"><div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="sendC()">➤</button><label ${lb}>🖼️<input type="file" accept="image/*" hidden onchange="pick(this,d=>sendC({img:d}))"></label><label ${lb}>🎥<input type="file" accept="video/*" hidden onchange="fileC(this,'vid')"></label><button class="g" id="rec" onclick="recC()">${mr?'⏹ Stop':'🎤'}</button></div></div>`
+},
 ref(){const base=location.origin+location.pathname+'?ref='+(slug(me.n)||me.id),mine=D.cust.filter(c=>c.ref===me.id),rec={};D.cust.forEach(c=>{const k=c.ref||'-';(rec[k]=rec[k]||{n:c.refName||'—',c:0,o:0}).c++;rec[k].o+=D.pos.filter(p=>p.cid===c.id).length});
 return `<div class="card"><h3>🔗 ${t('ref')}</h3><p style="word-break:break-all;margin:0 0 8px">${esc(base)}</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button onclick="navigator.clipboard.writeText('${base}').then(()=>toast('✔'),()=>toast('${base}'))">📋</button><a href="https://wa.me/?text=${encodeURIComponent('Daftar & pesan di '+(D.set.shop||D.set.name)+': '+base)}" target="_blank" rel="noopener"><button type="button" class="g">💬 WhatsApp</button></a></div></div><div class="card"><h3>👥 ${t('rec')} (${mine.length})</h3>${list(mine,c=>`<b>${esc(c.n)}</b><small>${esc(c.wa)} · ${c.d} · ${esc(c.addr)}</small>`)}</div>${me.r==='admin'?`<div class="card"><h3>📊 ${t('rec')}</h3>${Object.values(rec).map(r=>`<div class="row"><div><b>${esc(r.n)}</b></div><span>${r.c} 👥 · ${r.o} 🧾</span></div>`).join('')||`<small>${t('empty')}</small>`}</div>`:''}`},
 ai(){return `<div class="card"><h3>🧠 ${t('ai')}</h3><div class="f"><input id="mk" placeholder="${t('kw')}"><input id="mr" placeholder="${t('rx')}"><textarea id="ma" rows="3" placeholder="${t('ans')}"></textarea><button onclick="if(v('mk')&&v('ma')){D.mem.push({id:uid(),k:v('mk'),r:v('mr'),a:v('ma')});save();render()}">${t('add')}</button></div></div><div class="card">${list(D.mem,x=>`<b>${esc(x.k)}</b><small>${esc(x.r)} → ${esc(x.a)}</small>`)}</div>
@@ -125,7 +132,32 @@ function mkInvObj(c,items,by,walk,po){const total=items.reduce((s,i)=>s+i.q*i.p,
 function mkInv(id){const p=D.pos.find(x=>x.id===id),o=mkInvObj(p.c,p.items.concat(p.ship?[{a:'Pos',p:p.ship,q:1}]:[]),p.sales,false,id);p.inv=o.id;save();render();showInv(o.id)}
 function walk(){const p=D.prods.find(x=>x.id===v('b')),q=+v('c');if(!p||!q)return;const o=mkInvObj(v('a')||'-',[{a:p.a,p:p.p,q}],me.n,true);save();render();showInv(o.id)}
 function showInv(id){const i=D.inv.find(x=>x.id===id),s=D.set;$('#ov').style.display='flex';$('#ov').innerHTML=`<div class="inv">${s.logo?`<img class="wm" src="${s.logo}" alt="">`:''}<div style="display:flex;gap:10px;align-items:center;position:relative">${s.logo?`<img src="${s.logo}" width="48" height="48" alt="">`:''}<div><b>${esc(s.name)}</b><br><small>${esc(s.partner)}</small></div></div><h3 style="position:relative">${t('inv')} ${i.no}</h3><p style="position:relative">${i.d} · ${esc(i.c)}</p><table><tr><th>${t('prod')}</th><th>${t('qty')}</th><th>${t('price')}</th><th>${t('total')}</th></tr>${i.items.map(x=>`<tr><td>${esc(x.a)}</td><td>${x.q}</td><td>${(+x.p).toFixed(2)}</td><td>${(x.q*x.p).toFixed(2)}</td></tr>`).join('')}<tr><th colspan="3">${t('total')}</th><th>${rm(i.total)}</th></tr></table><p style="position:relative"><small>${esc(i.by)}</small></p><div class="np" style="position:relative;display:flex;gap:8px"><button onclick="window.print()">${t('print')}</button><button class="g" style="color:#111" onclick="closeOv()">OK</button></div></div>`}
-function sendC(x){if(x&&JSON.stringify(x).length>9e5)return toast('Terlalu besar (maks ~600KB)');const txt=v('cm');if(!txt&&!x)return;D.chat.push({id:uid(),by:me?(me.r==='admin'&&D.set.boss?D.set.boss:me.n):(cust?cust.n:'Pengguna'),ts:new Date().toLocaleString('ms-MY',{dateStyle:'short',timeStyle:'short'}),txt:x?'':txt,...x});D.chat=D.chat.slice(-60);save();render();const c=$('#cl');if(c)c.scrollTop=1e9}
+function sendC(x){
+  if(x&&JSON.stringify(x).length>9e5)return toast('Terlalu besar (maks ~600KB)');
+  const txt=v('cm');
+  if(!txt&&!x)return;
+
+  // Tentukan nama pengirim sesuai siapa yang login (admin, sales, atau staf)
+  let senderName = 'Pengguna';
+  if(me) {
+    senderName = me.n;
+  } else if(cust) {
+    senderName = cust.n;
+  }
+
+  D.chat.push({
+    id: uid(),
+    by: senderName,
+    ts: new Date().toLocaleString('ms-MY',{dateStyle:'short',timeStyle:'short'}),
+    txt: x?'':txt,
+    ...x
+  });
+
+  D.chat=D.chat.slice(-60);
+  save();
+  render();
+  const c=$('#cl');if(c)c.scrollTop=1e9;
+}
 function fileC(el,k){const f=el.files[0];if(!f)return;if(f.size>6e5)return toast('Maks 600KB');const r=new FileReader;r.onload=()=>sendC({[k]:r.result});r.readAsDataURL(f)}
 let mr=null,mt=0;
 async function recC(){try{if(mr){mr.stop();return}
