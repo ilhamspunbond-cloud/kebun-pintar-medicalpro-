@@ -275,7 +275,7 @@ home(){const mo=today().slice(0,7);return `${slotCard()}<div class="card ai">${o
 <div class="grid"><div class="card"><b>${D.works.filter(x=>x.st==='done'&&x.d.startsWith(mo)).length}</b><span>${t('done')}</span></div><div class="card"><b>${rm(sum(D.exp.filter(x=>x.ty==='kebun'&&x.d.startsWith(mo))))}</b><span>${t('spend')} ${t('kebun')}</span></div><div class="card"><b>${rm(sum(D.exp.filter(x=>x.ty==='office'&&x.d.startsWith(mo))))}</b><span>${t('spend')} ${t('office')}</span></div><div class="card"><b>${D.stock.length}</b><span>${t('stock')}</span></div></div>`},
 work(){
   const stockOpts = D.stock.map(s => `<option value="${s.id}">${esc(s.a)} (Stok: ${s.q} ${esc(s.u)})</option>`).join('');
-  return `<div class="card"><h3>${t('work')}</h3><div class="f"><label>${t('date')}<input id="wd" type="date" value="${today()}"></label><label>${t('wkr')}<select id="wk">${wkOpts()}</select></label><input id="a" placeholder="${t('desc')} (Cth: Potong rumput, pruning)"><input id="b" placeholder="${t('area')}"><div class="f2"><select id="stk_sel"><option value="">-- Pilih Baja (Opsional) --</option>${stockOpts}</select><input id="stk_qty" type="number" min="1" value="1" placeholder="Jumlah pakai"></div><select id="c"><option value="done">${t('done')}</option><option value="prog">${t('prog')}</option></select>${photoIn()}<button onclick="addW()">${t('add')}</button></div></div><div class="card">${list(D.works,x=>`<b>${esc(x.a)}</b><small>${x.d} · ${esc(x.b)} · 👷 ${esc(x.wk||x.by)} · ${t(x.st)}${x.usedStk?' · 🧪 Pakai: '+x.usedStk:''}</small>${x.st!=='done'?`<button class="g" onclick="D.works.find(w=>w.id=='${x.id}').st='done';save();render()">✔ ${t('done')}</button>`:''}`)}</div>`
+  return `<div class="card"><h3>${t('work')}</h3><div class="f"><label>${t('date')}<input id="wd" type="date" value="${today()}"></label><label>${t('wkr')}<select id="wk">${wkOpts()}</select></label><input id="a" placeholder="${t('desc')} (Cth: Potong rumput, pruning)"><input id="b" placeholder="${t('area')}"><div class="f2"><select id="stk_sel"><option value="">-- Pilih Baja (Opsional) --</option>${stockOpts}</select><input id="stk_qty" type="number" min="0" step="any" inputmode="decimal" value="1" placeholder="Jumlah pakai"></div><select id="c"><option value="done">${t('done')}</option><option value="prog">${t('prog')}</option></select>${photoIn()}<button onclick="addW()">${t('add')}</button></div></div><div class="card">${list(D.works,x=>`<b>${esc(x.a)}</b><small>${x.d} · ${esc(x.b)} · 👷 ${esc(x.wk||x.by)} · ${t(x.st)}${x.usedStk?' · 🧪 Pakai: '+x.usedStk:''}</small>${x.st!=='done'?`<button class="g" onclick="D.works.find(w=>w.id=='${x.id}').st='done';save();render()">✔ ${t('done')}</button>`:''}`)}</div>`
 },
 stock(){return `<div class="card"><h3>${t('stock')}</h3><div class="f"><input id="a" placeholder="${t('stock')}"><input id="b" placeholder="${t('use')}"><div class="f2"><input id="c" type="number" placeholder="${t('qty')}"><input id="d" placeholder="${t('unit')}"></div>${photoIn()}<button onclick="addS()">${t('add')}</button></div></div><div class="card">${list(D.stock,x=>`<b>${esc(x.a)}</b><small>${esc(x.b)}</small><span>${x.q} ${esc(x.u)}</span> <button class="g" onclick="stk('${x.id}',-1)">−</button> <button class="g" onclick="stk('${x.id}',1)">+</button> ${+x.q<=5?'⚠️':''}`)}</div>`},
 spend(){return `<div class="card"><h3>${t('spend')}</h3><div class="f"><label>${t('date')}<input id="ed" type="date" value="${today()}"></label><select id="a"><option value="kebun">${t('kebun')}</option><option value="office">${t('office')}</option></select><input id="b" placeholder="${t('desc')}"><input id="c" type="number" inputmode="decimal" placeholder="${t('amt')}">${photoIn()}<button onclick="addE()">${t('add')}</button></div></div><div class="card">${list(D.exp,x=>`<b>${esc(x.b)} — ${rm(x.amt)}</b><small>${x.d} · ${t(x.ty)} · ${esc(x.by)}</small>`)}</div>`},
@@ -308,11 +308,12 @@ function uwa(id){const u=D.users.find(x=>x.id===id);if(!u)return;const w=prompt(
 function addW(){
   const desc=v('a');
   const stkId=$('#stk_sel')?$('#stk_sel').value:'';
-  const stkQty=+$('#stk_qty')?+$('#stk_qty').value:1;
+  const stkQty=Math.max(0,+(($('#stk_qty')||{}).value)||1);
   let usedStkName='';
   if(stkId){
     const sItem=D.stock.find(s=>s.id===stkId);
     if(sItem){
+      if(stkQty>+sItem.q)return toast('⚠ Stok tidak cukup: tersisa '+sItem.q+' '+(sItem.u||''));
       sItem.q=Math.max(0,+sItem.q-stkQty);
       usedStkName=`${sItem.a} (-${stkQty} ${sItem.u||''})`;
     }
