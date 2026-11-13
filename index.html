@@ -365,7 +365,7 @@ const tick=setInterval(()=>{try{g.drawImage(v,0,0,cw,ch)}catch(_){}const p=Math.
 await new Promise(res=>{v.onended=res});
 clearInterval(tick);try{rec.stop()}catch(_){}await done;if(ac)try{ac.close()}catch(_){}URL.revokeObjectURL(url);closeOv();
 if(vcancel)throw new Error('cancel');
-const blob=new Blob(chunks,{type:ty||'video/webm'});if(blob.size>6e5)throw new Error('big');return await rd(blob)}
+const blob=new Blob(chunks,{type:(ty||'video/webm').split(';')[0]});if(blob.size>6e5)throw new Error('big');return await rd(blob)}
 const vErr=e=>e.message==='cancel'?'Dibatalkan':e.message==='big'?'Video masih terlalu besar, potong dulu':'Gagal memproses video: '+e.message;
 async function fileC(el,k){const f=el.files[0];if(!f)return;el.value='';try{const d=f.size<=4.5e5?await rd(f):await compressVid(f);sendC({[k]:d})}catch(e){closeOv();toast(vErr(e))}}
 let mr=null,mt=0;
