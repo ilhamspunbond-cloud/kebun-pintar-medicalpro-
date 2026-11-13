@@ -85,7 +85,7 @@ const L={myph:["Tukar foto profil", "Ganti foto profil", "Change profile photo",
   rexp:["Contoh: 1 kg pertama RM8, setiap kg tambahan RM2, maka pesanan 3 kg = RM8 + 2 × RM2 = RM12. Wilayah dikesan automatik daripada alamat pembeli. Berat dikira daripada berat produk atau isi padu (P×L×T ÷ 5000), mana yang lebih besar.", "Contoh: 1 kg pertama RM8, tiap kg tambahan RM2, maka pesanan 3 kg = RM8 + 2 × RM2 = RM12. Wilayah dideteksi otomatis dari alamat pembeli. Berat dihitung dari berat produk atau volume (P×L×T ÷ 5000), mana yang lebih besar.", "Example: first 1 kg RM8, each extra kg RM2, so a 3 kg order = RM8 + 2 × RM2 = RM12. The region is detected automatically from the buyer’s address. Weight is the product weight or volumetric weight (L×W×H ÷ 5000), whichever is larger."],
   apinote:["Kunci API disimpan kekal sehingga anda ubah. Semakan kos pos automatik melalui API kurier/agregator memerlukan sambungan pelayan (belum aktif); buat masa ini kos pos dikira daripada jadual tarif di atas.", "Kunci API tersimpan permanen sampai Anda ubah. Cek ongkir otomatis lewat API kurir/agregator butuh sambungan server (belum aktif); saat ini ongkir dihitung dari tabel tarif di atas.", "The API key is stored permanently until you change it. Automatic rate checks through a courier/aggregator API need a server connection (not active yet); for now shipping is calculated from the rate table above."],
   vtitle:["Video iklan produk (pilih salah satu)", "Video iklan produk (pilih salah satu)", "Product ad video (choose one)"],
-  vhelp:["Pilihan A (disyorkan): muat naik video ke YouTube (mod “Tidak disenaraikan”), salin pautannya dan tampal di kotak pautan. Pilihan B: pilih fail video pendek dari telefon (maksimum ±550KB, kira-kira 5 saat). Video dimainkan apabila pembeli membuka butiran produk.", "Pilihan A (disarankan): unggah video ke YouTube (mode “Tidak publik”), salin link lalu tempel di kotak link. Pilihan B: pilih file video pendek dari HP (maks ±550KB, sekitar 5 detik). Video diputar saat pembeli membuka detail produk.", "Option A (recommended): upload the video to YouTube (“Unlisted”), copy the link and paste it in the link box. Option B: pick a short video file from your phone (max ±550KB, about 5 seconds). The video plays when the buyer opens the product details."],
+  vhelp:["Pilihan A (disyorkan): muat naik video ke YouTube (mod “Tidak disenaraikan”), salin pautannya dan tampal di kotak pautan. Pilihan B: pilih fail video pendek dari telefon (dikompres automatik ke ±550KB; makin panjang, makin rendah kualitinya). Video dimainkan apabila pembeli membuka butiran produk.", "Pilihan A (disarankan): unggah video ke YouTube (mode “Tidak publik”), salin link lalu tempel di kotak link. Pilihan B: pilih file video pendek dari HP (dikompres otomatis ke ±550KB; makin panjang, makin rendah kualitasnya). Video diputar saat pembeli membuka detail produk.", "Option A (recommended): upload the video to YouTube (“Unlisted”), copy the link and paste it in the link box. Option B: pick a short video file from your phone (auto-compressed to ±550KB; the longer the video, the lower the quality). The video plays when the buyer opens the product details."],
   vor:["atau fail video pendek:", "atau file video pendek:", "or a short video file:"],
   clrall:["Padam semua", "Hapus semua", "Delete all"],
   walist:["Nombor WhatsApp penerima pesanan (tambah / padam)", "Nomor WhatsApp penerima pesanan (tambah / hapus)", "Order WhatsApp numbers (add / remove)"],
@@ -301,7 +301,7 @@ set(){
 };
 const wkOpts=()=>{const a=D.users.filter(u=>u.r==='worker').map(u=>u.n);if(!a.length)a.push(me.n);return a.map(n=>`<option>${esc(n)}</option>`).join('')};
 function supH(id){const x=D.harv.find(z=>z.id===id);if(!x)return;x.sup=true;x.sd=today();save();render()}
-let pvd='';function pvid(el){const f=el.files[0];if(!f)return;if(f.size>563200){el.value='';return toast('Maks ±550KB / max ±550KB')}const r=new FileReader;r.onload=()=>{(pvd=r.result);toast('✔ 🎬')};r.readAsDataURL(f)}
+let pvd='';async function pvid(el){const f=el.files[0];if(!f)return;try{pvd=f.size<=4.5e5?await rd(f):await compressVid(f);toast('✔ 🎬')}catch(e){closeOv();pvd='';toast(vErr(e))}}
 function addWa(){const n=v('wn').trim();if(!n)return;D.shp.was=(D.shp.was||[]).concat({id:uid(),l:v('wl')||'WA',n});save();render()}
 function delWa(id){D.shp.was=(D.shp.was||[]).filter(w=>w.id!==id);save();render()}
 function uwa(id){const u=D.users.find(x=>x.id===id);if(!u)return;const w=prompt('WhatsApp',u.wa||'');if(w!==null){u.wa=w.trim();save();render()}}
@@ -345,7 +345,29 @@ function sendC(x){
   render();
   const c=$('#cl');if(c)c.scrollTop=1e9;
 }
-function fileC(el,k){const f=el.files[0];if(!f)return;if(f.size>6e5)return toast('Maks 600KB');const r=new FileReader;r.onload=()=>sendC({[k]:r.result});r.readAsDataURL(f)}
+const rd=f=>new Promise(r=>{const fr=new FileReader;fr.onload=()=>r(fr.result);fr.readAsDataURL(f)});
+let vcancel=false;
+async function compressVid(file,maxB){maxB=maxB||5.4e5;
+const url=URL.createObjectURL(file),v=document.createElement('video');v.src=url;v.playsInline=true;v.preload='auto';
+await new Promise((res,rej)=>{v.onloadedmetadata=res;v.onerror=()=>rej(new Error('format tidak didukung'))});
+let d=v.duration;if(!isFinite(d)||d<=0)d=60;
+if(d>600)throw new Error('maks 10 minit / 10 menit');
+if(d>180&&!confirm('Video '+Math.round(d/60)+' min. Diproses ±'+Math.round(d/60)+' min (jangan tutup aplikasi). OK?'))throw new Error('cancel');
+const ab=d<=45?24000:d<=120?12000:0,vb=Math.max(5000,Math.min(600000,Math.floor(maxB*.8*8/d-ab))),W=vb>=200000?480:vb>=100000?360:vb>=50000?240:160,fps=vb>=100000?15:vb>=40000?10:6,sc=Math.min(1,W/Math.max(v.videoWidth,v.videoHeight)),cw=Math.max(2,Math.round(v.videoWidth*sc/2)*2),ch=Math.max(2,Math.round(v.videoHeight*sc/2)*2);
+const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;const g=cv.getContext('2d'),vs=cv.captureStream(fps);let ac=null;
+if(ab){try{ac=new(window.AudioContext||window.webkitAudioContext)();if(ac.resume)ac.resume();const src=ac.createMediaElementSource(v),dst=ac.createMediaStreamDestination();src.connect(dst);dst.stream.getAudioTracks().forEach(t=>vs.addTrack(t))}catch(e){ac=null}}
+const ty=['video/webm;codecs=vp8,opus','video/webm;codecs=vp8','video/webm','video/mp4'].find(x=>MediaRecorder.isTypeSupported(x)),o={videoBitsPerSecond:vb};if(ac)o.audioBitsPerSecond=ab;if(ty)o.mimeType=ty;
+const rec=new MediaRecorder(vs,o),chunks=[];rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);const done=new Promise(res=>{rec.onstop=res});
+vcancel=false;const ov=$('#ov');ov.style.display='flex';ov.innerHTML='<div class="inv" style="background:var(--card);color:var(--ink);text-align:center"><b>🎬 Mengompres video…</b><div style="height:10px;background:var(--ln);border-radius:6px;margin:10px 0"><div id="vp" style="height:10px;width:0;background:var(--c);border-radius:6px"></div></div><small id="vt">0%</small><br><button class="g" onclick="vcancel=true">✖</button></div>';
+rec.start(1000);
+try{await v.play()}catch(e){v.muted=true;await v.play()}
+const tick=setInterval(()=>{try{g.drawImage(v,0,0,cw,ch)}catch(_){}const p=Math.min(100,Math.round(v.currentTime/d*100)),b=$('#vp'),x=$('#vt');if(b)b.style.width=p+'%';if(x)x.textContent=p+'% · '+Math.max(0,Math.round(d-v.currentTime))+'s';if(vcancel){v.pause();v.dispatchEvent(new Event('ended'))}},1000/fps);
+await new Promise(res=>{v.onended=res});
+clearInterval(tick);try{rec.stop()}catch(_){}await done;if(ac)try{ac.close()}catch(_){}URL.revokeObjectURL(url);closeOv();
+if(vcancel)throw new Error('cancel');
+const blob=new Blob(chunks,{type:ty||'video/webm'});if(blob.size>6e5)throw new Error('big');return await rd(blob)}
+const vErr=e=>e.message==='cancel'?'Dibatalkan':e.message==='big'?'Video masih terlalu besar, potong dulu':'Gagal memproses video: '+e.message;
+async function fileC(el,k){const f=el.files[0];if(!f)return;el.value='';try{const d=f.size<=4.5e5?await rd(f):await compressVid(f);sendC({[k]:d})}catch(e){closeOv();toast(vErr(e))}}
 let mr=null,mt=0;
 async function recC(){try{if(mr){mr.stop();return}
 if(!navigator.mediaDevices||!window.MediaRecorder)return toast('Perangkat tidak mendukung rekaman');
